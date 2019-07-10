@@ -1,93 +1,130 @@
 <template>
-  <v-layout
-    column
-    justify-center
-    align-center
-  >
+  <v-layout wrap>
+    <h2>Upcoming Yoda: {{ 'George Olson - Drugs' }}</h2>
+    <nuxt-link to="/add">
+      <v-btn
+        color="primary"
+        fixed
+        top
+        right
+        outline
+        small
+        dark
+        bottom
+      >
+        Add a Session
+      </v-btn>
+    </nuxt-link>
     <v-flex
       xs12
-      sm8
-      md6
+      class="mb-3"
     >
-      <div class="text-xs-center">
-        <logo />
-        <vuetify-logo />
-      </div>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>
-            For more information on Vuetify, check out the <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-            >
-              documentation
-            </a>.
-          </p>
-          <p>
-            If you have questions, please join the official <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              title="chat"
-            >
-              discord
-            </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              title="contribute"
-            >
-              issue board
-            </a>.
-          </p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3">
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-          >
-            Nuxt Documentation
-          </a>
-          <br>
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            flat
-            nuxt
-            to="/inspire"
-          >
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+      <h2 class="text-xs-center primary--text">{{currentMonth}}</h2>
+      <v-sheet height="500">
+        <v-calendar
+          ref="calendar"
+          v-model="start"
+          :type="type"
+          color="primary"
+        >
+          <template v-slot:day="{ date }">
+            <template v-for="event in eventsMap[date]">
+              <v-menu
+                :key="event.title"
+                v-model="event.open"
+                full-width
+                offset-x
+              >
+                <template v-slot:activator="{ on }">
+                  <div
+                    v-if="!event.time"
+                    v-ripple
+                    class="my-event"
+                    v-on="on"
+                    v-html="event.title"
+                  ></div>
+                </template>
+                <v-card
+                  class="event-card"
+                  color="grey lighten-4"
+                  min-width="350px"
+                  flat
+                >
+                  <v-toolbar
+                    color="primary"
+                    dark
+                  >
+                    <v-btn icon>
+                      <v-icon>edit</v-icon>
+                    </v-btn>
+                    <v-toolbar-title v-html="event.title"></v-toolbar-title>
+                  </v-toolbar>
+                  <v-card-title primary-title>
+                    <span v-html="event.details"></span>
+                  </v-card-title>
+                  <v-card-actions>
+                    <v-btn
+                      flat
+                      color="secondary"
+                    >
+                      Cancel
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-menu>
+            </template>
+          </template>
+        </v-calendar>
+      </v-sheet>
+    </v-flex>
+
+    <v-flex xs1>
+      <v-btn
+        outline
+        small
+        color="primary"
+        @click="$refs.calendar.prev()"
+      >
+        <v-icon dark>
+          keyboard_arrow_left
+        </v-icon>
+      </v-btn>
+    </v-flex>
+    <v-spacer></v-spacer>
+    <v-flex xs1>
+      <v-btn
+        outline
+        small
+        color="primary"
+        @click="$refs.calendar.next()"
+      >
+        <v-icon dark>
+          keyboard_arrow_right
+        </v-icon>
+      </v-btn>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
 import Logo from '~/components/Logo.vue'
-import VuetifyLogo from '~/components/VuetifyLogo.vue'
-
+import * as moment from 'moment';
 export default {
-  components: {
-    Logo,
-    VuetifyLogo
+  data: () => ({
+    type: 'month',
+    start: Date.now().date,
+    end: Date.now().date,
+    events: []
+  }),
+  computed: {
+    currentMonth: function () {
+      return moment(this.start).format('MMMM');
+    },
+    eventsMap() {
+      const map = {}
+      this.events.forEach(e => (map[e.date] = map[e.date] || []).push(e))
+      return map
+    }
   }
 }
 </script>
