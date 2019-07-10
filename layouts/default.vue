@@ -1,5 +1,5 @@
 <template>
-  <v-app light>
+  <v-app :dark="isDark">
     <v-content>
       <v-container>
         <nuxt />
@@ -15,6 +15,7 @@ export default {
       clipped: false,
       drawer: false,
       fixed: false,
+      isDark: false,
       items: [
         {
           icon: 'apps',
@@ -32,6 +33,26 @@ export default {
       rightDrawer: false,
       title: 'Vuetify.js'
     }
+  },
+  methods: {
+    konami(callback) {
+      let kkeys = [];
+      // up,up,down,down,left,right,left,right,B,A
+      const konami = '38,38,40,40,37,39,37,39,66,65';
+      return event => {
+        kkeys.push(event.keyCode);
+        if (kkeys.toString().indexOf(konami) >= 0) {
+          callback();
+          kkeys = [];
+        }
+      };
+    }
+  },
+  created: function () {
+    const handler = this.konami(() => {
+      this.isDark = !this.isDark;
+    });
+    window.addEventListener('keydown', handler);
   }
 }
 </script>
